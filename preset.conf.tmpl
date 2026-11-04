@@ -1,0 +1,48 @@
+# Odoo behind Nginx, as Odoo's deployment guide describes: live updates
+# (/websocket) go to Odoo's gevent port, everything else to its HTTP port.
+
+# Wodby's gateway terminates TLS, so the scheme and client address it saw are
+# passed on to Odoo, which runs with proxy_mode.
+set $odoo_forwarded_proto $scheme;
+if ($http_x_forwarded_proto) {
+    set $odoo_forwarded_proto $http_x_forwarded_proto;
+}
+set $odoo_forwarded_for $remote_addr;
+if ($http_x_forwarded_for) {
+    set $odoo_forwarded_for $http_x_forwarded_for;
+}
+
+proxy_set_header Host $http_host;
+proxy_set_header X-Forwarded-Host $http_host;
+proxy_set_header X-Forwarded-Proto $odoo_forwarded_proto;
+proxy_set_header X-Forwarded-For $odoo_forwarded_for;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_redirect off;
+
+# Odoo stops a request after its own time limit; Nginx waits longer.
+proxy_connect_timeout {{ getenv "NGINX_ODOO_PROXY_TIMEOUT" "720s" }};
+proxy_send_timeout {{ getenv "NGINX_ODOO_PROXY_TIMEOUT" "720s" }};
+proxy_read_timeout {{ getenv "NGINX_ODOO_PROXY_TIMEOUT" "720s" }};
+
+location /websocket {
+    proxy_pass http://{{ getenv "NGINX_BACKEND_HOST" }}:{{ getenv "NGINX_ODOO_GEVENT_PORT" "8072" }};
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-Host $http_host;
+    proxy_set_header X-Forwarded-Proto $odoo_forwarded_proto;
+    proxy_set_header X-Forwarded-For $odoo_forwarded_for;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_read_timeout 3600s;
+    proxy_send_timeout 3600s;
+}
+
+location / {
+    proxy_pass http://app_server;
+}
+
+location = /.healthz {
+    access_log off;
+    return 204;
+}
