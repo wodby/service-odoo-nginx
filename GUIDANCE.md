@@ -14,6 +14,7 @@ overridden there. The preset keeps the name `http-proxy` (`NGINX_VHOST_PRESET`),
 - Everything else goes to Odoo's HTTP port.
 - The scheme and client address that Wodby's gateway received are passed on in `X-Forwarded-Proto` and
   `X-Forwarded-For`, with the original `Host`; Odoo runs with `proxy_mode`.
+- Odoo's `session_id` cookie gets the `Secure` flag when the visitor used HTTPS; Odoo never sets it itself.
 - Proxy timeouts are 720 s (`NGINX_ODOO_PROXY_TIMEOUT`); Odoo stops a request after its own limit first.
 - `/.healthz` returns 204.
 - The image's default rules are off (`NGINX_VHOST_NO_DEFAULTS`): they would serve `/favicon.ico` and video files from

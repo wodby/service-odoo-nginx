@@ -7,6 +7,13 @@ set $odoo_forwarded_proto $scheme;
 if ($http_x_forwarded_proto) {
     set $odoo_forwarded_proto $http_x_forwarded_proto;
 }
+# Odoo never marks its session cookie Secure. It is, when the visitor used HTTPS.
+set $odoo_cookie_secure nosecure;
+if ($odoo_forwarded_proto = https) {
+    set $odoo_cookie_secure secure;
+}
+proxy_cookie_flags session_id $odoo_cookie_secure;
+
 set $odoo_forwarded_for $remote_addr;
 if ($http_x_forwarded_for) {
     set $odoo_forwarded_for $http_x_forwarded_for;
