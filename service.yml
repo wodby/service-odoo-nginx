@@ -1,0 +1,50 @@
+name: odoo-nginx
+type: service
+from: nginx-proxy
+guidance: GUIDANCE.md
+fromVersionConstraint: "^1.0.0"
+fromVersion: "1.1.7"
+title: Nginx (Odoo)
+
+labels:
+- odoo
+
+links:
+- name: backend
+  title: Odoo
+  selectors:
+  - type: service
+    labels:
+    - odoo
+
+# Odoo answers on its own and live updates stay open for long, so requests are
+# allowed up to an hour through the gateway.
+endpoints:
+- name: http
+  ports:
+  - name: http
+    number: 80
+    protocol: http
+    main: true
+    routeDefaults:
+      request_timeout: 1h
+      backend_request_timeout: 1h
+
+# Odoo's rules replace the image's http-proxy preset. The service keeps the
+# preset name http-proxy, which also makes the image point the app_server
+# upstream at the linked Odoo service.
+configs:
+- name: preset
+  title: Odoo preset
+  filepath: /etc/gotpl/presets/http-proxy.conf.tmpl
+  config: preset.conf.tmpl
+
+env:
+# The image's defaults serve some paths, such as /favicon.ico and video files,
+# from disk and forbid framing, which breaks Odoo's website editor. The preset
+# keeps what Odoo needs.
+- name: NGINX_VHOST_NO_DEFAULTS
+  value: '1'
+# Attachments and imports.
+- name: NGINX_CLIENT_MAX_BODY_SIZE
+  value: 128m
