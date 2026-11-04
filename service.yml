@@ -1,9 +1,9 @@
 name: odoo-nginx
 type: service
-from: nginx
+from: nginx-proxy
 guidance: GUIDANCE.md
-fromVersionConstraint: "^2.0.0"
-fromVersion: "2.1.7"
+fromVersionConstraint: "^1.0.0"
+fromVersion: "1.1.7"
 title: Nginx (Odoo)
 
 labels:
@@ -12,12 +12,6 @@ labels:
 links:
 - name: backend
   title: Odoo
-  required: true
-  env:
-  - name: NGINX_BACKEND_HOST
-    value: '{{link.host}}'
-  - name: NGINX_BACKEND_PORT
-    value: '{{link.port}}'
   selectors:
   - type: service
     labels:
@@ -36,15 +30,6 @@ endpoints:
       request_timeout: 1h
       backend_request_timeout: 1h
 
-# Nothing from the Odoo repository is served by Nginx: the image is the stock
-# one, built only because the base service builds its image.
-build:
-  link: backend
-  dockerfileContent: |
-    ARG WODBY_BASE_IMAGE
-    FROM ${WODBY_BASE_IMAGE}
-  dockerignoreContent: '*'
-
 # Odoo's rules replace the image's http-proxy preset. The service keeps the
 # preset name http-proxy, which also makes the image point the app_server
 # upstream at the linked Odoo service.
@@ -55,8 +40,6 @@ configs:
   config: preset.conf.tmpl
 
 env:
-- name: NGINX_VHOST_PRESET
-  value: http-proxy
 # The image's defaults serve some paths, such as /favicon.ico and video files,
 # from disk and forbid framing, which breaks Odoo's website editor. The preset
 # keeps what Odoo needs.

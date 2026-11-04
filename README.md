@@ -20,10 +20,10 @@ configuration for Nginx (Odoo).
 | --- | --- |
 | Service name | `odoo-nginx` |
 | Type | Application service |
-| Inherits from | [`nginx`](https://github.com/wodby/service-nginx) with version constraint `^2.0.0` |
+| Inherits from | [`nginx-proxy`](https://github.com/wodby/service-nginx-proxy) with version constraint `^1.0.0` |
 | Service links | Odoo, required |
 | Configs | `preset`: Odoo's proxy rules |
-| Application build | Stock Nginx image, built with the linked Odoo service |
+| Image | Stock Nginx image, no build |
 
 ## Use this service
 

@@ -1,6 +1,6 @@
 # Nginx for Odoo on Wodby
 
-What this service adds to the Nginx service it is based on. It is the public entry point of an Odoo app: Odoo's own
+What this service adds to the Nginx Proxy service it is based on. It is the public entry point of an Odoo app: Odoo's own
 ports are private.
 
 ## Rules
@@ -19,9 +19,9 @@ overridden there. The preset keeps the name `http-proxy` (`NGINX_VHOST_PRESET`),
 - The image's default rules are off (`NGINX_VHOST_NO_DEFAULTS`): they would serve `/favicon.ico` and video files from
   disk and forbid framing, which Odoo's website editor needs.
 
-## Build
+## Image
 
-The image is the stock Nginx image; nothing from the Odoo repository is copied into it.
+The stock Nginx image; nothing is built for this service.
 
 ## Uploads and timeouts
 
